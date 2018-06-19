@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { ITimedData } from "../types";
 import {
   areNearlyEqual,
   getDataAfter,
   getDataBefore,
   removeDataInfosBetween,
-} from "../utils";
+} from "../buffer_manager_utils";
+import { ITimedData } from "../types";
 
 describe("HTML Buffer Manager utils - getDataBefore", () => {
   it("should get the right timed data when time is the start of an item", () => {
