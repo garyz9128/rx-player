@@ -283,6 +283,7 @@ class Player extends EventEmitter<PLAYER_EVENT_STRINGS, any> {
       video? : number;
       text? : number;
       image? : number;
+      overlay? : number;
     };
 
     /**
@@ -294,6 +295,7 @@ class Player extends EventEmitter<PLAYER_EVENT_STRINGS, any> {
       video : number; // has a default in the config
       text? : number;
       image? : number;
+      overlay? : number;
     };
 
     /**
@@ -305,6 +307,7 @@ class Player extends EventEmitter<PLAYER_EVENT_STRINGS, any> {
       video : number; // has a default in the config
       text? : number;
       image? : number;
+      overlay? : number;
     };
   };
 
@@ -759,6 +762,9 @@ class Player extends EventEmitter<PLAYER_EVENT_STRINGS, any> {
         textTrackElement: options.textTrackElement,
       };
 
+      const overlayOptions = options.overlayElement != null ?
+        { overlayElement: options.overlayElement } : undefined;
+
       // playback$ Observable, through which the content will be launched.
       playback$ = initializeMediaSourcePlayback({
         adaptiveOptions,
@@ -773,7 +779,10 @@ class Player extends EventEmitter<PLAYER_EVENT_STRINGS, any> {
         pipelines,
         speed$: this._priv_speed$,
         startAt,
-        textTrackOptions,
+        sourceBufferOptions: {
+          text: textTrackOptions,
+          overlay: overlayOptions,
+        },
         url,
       })
         .pipe(takeUntil(contentIsStopped$))
