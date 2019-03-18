@@ -13231,18 +13231,7 @@ object-assign
  */        !function(SourceBufferAction) {
             SourceBufferAction[SourceBufferAction.Append = 0] = "Append", SourceBufferAction[SourceBufferAction.Remove = 1] = "Remove";
         }(SourceBufferAction || (SourceBufferAction = {}));
-        /**
- * Wrap a SourceBuffer and append/remove segments in it in a queue.
- *
- * Wait for the previous buffer action to be finished (updateend event) to
- * perform the next in the queue.
- *
- * To work correctly, only a single QueuedSourceBuffer per SourceBuffer should
- * be created.
- *
- * @class QueuedSourceBuffer
- */
-        var queued_source_buffer_QueuedSourceBuffer = 
+        var SEGMENT_CACHE = {}, queued_source_buffer_QueuedSourceBuffer = 
         /* */
         function() {
             /**
@@ -13446,8 +13435,9 @@ object-assign
                                 log.a.debug("QSB: updating timestampOffset", this.bufferType, this._sourceBuffer.timestampOffset, newTimestampOffset), 
                                 this._sourceBuffer.timestampOffset = newTimestampOffset;
                             }
-                            log.a.debug("QSB: pushing new data to SourceBuffer", this.bufferType), isInit && (this._lastInitSegment = segment), 
-                            this._sourceBuffer.appendBuffer(segment);
+                            for (log.a.debug("QSB: pushing new data to SourceBuffer", this.bufferType), isInit && (this._lastInitSegment = segment), 
+                            null == SEGMENT_CACHE[this.bufferType] && (SEGMENT_CACHE[this.bufferType] = []); 30 <= SEGMENT_CACHE[this.bufferType].length; ) SEGMENT_CACHE[this.bufferType].shift();
+                            SEGMENT_CACHE[this.bufferType].push(segment), this._sourceBuffer.appendBuffer(segment);
                             break;
 
                           case SourceBufferAction.Remove:
@@ -13465,7 +13455,8 @@ object-assign
                     return this._currentCodec;
                 }
             } ]), QueuedSourceBuffer;
-        }(), POSSIBLE_BUFFER_TYPES = [ "audio", "video", "text", "image" ];
+        }();
+        window.SEGMENT_CACHE = SEGMENT_CACHE;
         // CONCATENATED MODULE: ./src/core/source_buffers/source_buffers_manager.ts
         /**
  * Copyright 2015 CANAL+ Group
@@ -13481,13 +13472,13 @@ object-assign
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */        
+ */
+        var POSSIBLE_BUFFER_TYPES = [ "audio", "video", "text", "image" ];
         /**
  * Get all currently available buffer types.
  * /!\ This list can evolve at runtime depending on feature switching.
  * @returns {Array.<string>}
- */
-        function getBufferTypes() {
+ */        function getBufferTypes() {
             var bufferTypes = [ "audio", "video" ];
             return null == features.a.nativeTextTracksBuffer && null == features.a.htmlTextTracksBuffer || bufferTypes.push("text"), 
             null != features.a.imageBuffer && bufferTypes.push("image"), bufferTypes;

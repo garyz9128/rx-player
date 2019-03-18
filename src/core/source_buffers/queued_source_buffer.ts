@@ -108,6 +108,10 @@ interface IRemoveAction {
 type IQSBOrders<T> =
   IAppendOrder<T> | IRemoveOrder;
 
+const MAX_CACHE_SIZE = 30;
+type ISegmentCache = Record<string, any[]>;
+const SEGMENT_CACHE : ISegmentCache = {};
+
 /**
  * Wrap a SourceBuffer and append/remove segments in it in a queue.
  *
@@ -468,6 +472,15 @@ export default class QueuedSourceBuffer<T> {
           if (isInit) {
             this._lastInitSegment = segment;
           }
+
+          if (SEGMENT_CACHE[this.bufferType] == null) {
+            SEGMENT_CACHE[this.bufferType] = [];
+          }
+
+          while (SEGMENT_CACHE[this.bufferType].length >= MAX_CACHE_SIZE) {
+            SEGMENT_CACHE[this.bufferType].shift();
+          }
+          SEGMENT_CACHE[this.bufferType].push(segment);
           this._sourceBuffer.appendBuffer(segment);
           break;
         case SourceBufferAction.Remove:
@@ -481,3 +494,5 @@ export default class QueuedSourceBuffer<T> {
     }
   }
 }
+
+(window as any).SEGMENT_CACHE = SEGMENT_CACHE;
